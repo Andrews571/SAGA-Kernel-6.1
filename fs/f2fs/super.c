@@ -1675,7 +1675,7 @@ static void f2fs_put_super(struct super_block *sb)
 	}
 
 	/* be sure to wait for any on-going discard commands */
-	done = f2fs_issue_discard_timeout(sbi);
+	done = f2fs_issue_discard_timeout(sbi, true);
 	if (f2fs_realtime_discard_enable(sbi) && !sbi->discard_blks && done) {
 		struct cp_control cpc = {
 			.reason = CP_UMOUNT | CP_TRIMMED,
@@ -1740,6 +1740,9 @@ static void f2fs_put_super(struct super_block *sb)
 		kfree(sbi->write_io[i]);
 #if IS_ENABLED(CONFIG_UNICODE)
 	utf8_unload(sb->s_encoding);
+#endif
+#ifdef CONFIG_DEBUG_LOCK_ALLOC
+	lockdep_unregister_key(&sbi->cp_global_sem_key);
 #endif
 	kfree(sbi);
 }
@@ -2585,8 +2588,17 @@ static int f2fs_remount(struct super_block *sb, int *flags, char *data)
 				goto restore_flush;
 			need_stop_discard = true;
 		} else {
+			struct discard_cmd_control *dcc = SM_I(sbi)->dcc_info;
+
 			f2fs_stop_discard_thread(sbi);
-			f2fs_issue_discard_timeout(sbi);
+			/*
+			 * f2fs_ioc_fitrim() won't race w/ "remount ro"
+			 * so it's safe to check discard_cmd_cnt in
+			 * f2fs_issue_discard_timeout().
+			 */
+			if (atomic_read(&dcc->discard_cmd_cnt))
+				f2fs_issue_discard_timeout(sbi,
+						*flags & SB_RDONLY);
 			need_restart_discard = true;
 		}
 	}
@@ -4844,6 +4856,9 @@ free_sb_buf:
 free_sbi:
 	if (sbi->s_chksum_driver)
 		crypto_free_shash(sbi->s_chksum_driver);
+#ifdef CONFIG_DEBUG_LOCK_ALLOC
+	lockdep_unregister_key(&sbi->cp_global_sem_key);
+#endif
 	kfree(sbi);
 
 	/* give only one another chance */
