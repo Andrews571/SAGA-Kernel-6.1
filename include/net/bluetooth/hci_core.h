@@ -321,7 +321,7 @@ struct adv_monitor {
 #define HCI_MAX_SHORT_NAME_LENGTH	10
 
 #define HCI_CONN_HANDLE_MAX		0x0eff
-#define HCI_CONN_HANDLE_UNSET(_handle)	(_handle > HCI_CONN_HANDLE_MAX)
+#define HCI_CONN_HANDLE_UNSET		0xffff
 
 /* Min encryption key size to match with SMP */
 #define HCI_MIN_ENC_KEY_SIZE		7
@@ -1340,9 +1340,7 @@ bool hci_iso_setup_path(struct hci_conn *conn);
 int hci_le_create_cis(struct hci_conn *conn);
 
 struct hci_conn *hci_conn_add(struct hci_dev *hdev, int type, bdaddr_t *dst,
-			      u8 role, u16 handle);
-struct hci_conn *hci_conn_add_unset(struct hci_dev *hdev, int type,
-				    bdaddr_t *dst, u8 role);
+			      u8 role);
 int hci_conn_del(struct hci_conn *conn);
 void hci_conn_hash_flush(struct hci_dev *hdev);
 void hci_conn_check_pending(struct hci_dev *hdev);
