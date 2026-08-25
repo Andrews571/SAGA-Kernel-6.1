@@ -29,6 +29,7 @@
 
 #include <asm/unaligned.h>
 #include <linux/atomic.h>
+#include <linux/idr.h>
 #include <linux/android_kabi.h>
 
 /* L2CAP defaults */
@@ -715,7 +716,7 @@ struct l2cap_conn {
 	struct kref		ref;
 	struct list_head	users;
 
-	ANDROID_KABI_RESERVE(1);
+	ANDROID_KABI_USE(1, struct ida tx_ida);
 	ANDROID_KABI_RESERVE(2);
 };
 
@@ -999,7 +1000,7 @@ int l2cap_chan_reconfigure(struct l2cap_chan *chan, __u16 mtu);
 int l2cap_chan_send(struct l2cap_chan *chan, struct msghdr *msg, size_t len);
 void l2cap_chan_busy(struct l2cap_chan *chan, int busy);
 int l2cap_chan_check_security(struct l2cap_chan *chan, bool initiator);
-void l2cap_chan_set_defaults(struct l2cap_chan *chan);
+void l2cap_chan_set_defaults(struct l2cap_chan *chan, struct l2cap_chan *pchan);
 int l2cap_ertm_init(struct l2cap_chan *chan);
 void l2cap_chan_add(struct l2cap_conn *conn, struct l2cap_chan *chan);
 void __l2cap_chan_add(struct l2cap_conn *conn, struct l2cap_chan *chan);
