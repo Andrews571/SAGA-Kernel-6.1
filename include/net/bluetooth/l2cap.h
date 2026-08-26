@@ -658,7 +658,8 @@ struct l2cap_chan {
 struct l2cap_ops {
 	char			*name;
 
-	struct l2cap_chan	*(*new_connection) (struct l2cap_chan *chan);
+	int			(*new_connection) (struct l2cap_chan *chan,
+						    struct l2cap_chan *new_chan);
 	int			(*recv) (struct l2cap_chan * chan,
 					 struct sk_buff *skb);
 	void			(*teardown) (struct l2cap_chan *chan, int err);
@@ -716,7 +717,8 @@ struct l2cap_conn {
 	struct kref		ref;
 	struct list_head	users;
 
-	ANDROID_KABI_USE(1, struct ida tx_ida);
+	struct ida		tx_ida;
+	ANDROID_KABI_RESERVE(1);
 	ANDROID_KABI_RESERVE(2);
 };
 
@@ -923,9 +925,10 @@ static inline __u16 __next_seq(struct l2cap_chan *chan, __u16 seq)
 	return (seq + 1) % (chan->tx_win_max + 1);
 }
 
-static inline struct l2cap_chan *l2cap_chan_no_new_connection(struct l2cap_chan *chan)
+static inline int l2cap_chan_no_new_connection(struct l2cap_chan *chan,
+						struct l2cap_chan *new_chan)
 {
-	return NULL;
+	return -ENOTCONN;
 }
 
 static inline int l2cap_chan_no_recv(struct l2cap_chan *chan, struct sk_buff *skb)
