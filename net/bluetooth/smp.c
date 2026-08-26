@@ -3326,7 +3326,7 @@ create_chan:
 
 	l2cap_add_scid(chan, cid);
 
-	l2cap_chan_set_defaults(chan);
+	l2cap_chan_set_defaults(chan, NULL);
 
 	if (cid == L2CAP_CID_SMP) {
 		u8 bdaddr_type;
