@@ -48,6 +48,22 @@ struct nf_conntrack_expect {
 	/* Expectation class */
 	unsigned int class;
 
+	/* Function to call after setup and insertion */
+	void (*expectfn)(struct nf_conn *new,
+			 struct nf_conntrack_expect *this);
+
+	/* Helper that created this expectation */
+	struct nf_conntrack_helper __rcu *helper;
+
+	/* Helper to assign to new connection */
+	struct nf_conntrack_helper __rcu *assign_helper;
+
+	/* The conntrack of the master connection */
+	struct nf_conn *master;
+
+	/* Timer function; deletes the expectation. */
+	struct timer_list timeout;
+
 #if IS_ENABLED(CONFIG_NF_NAT)
 	union nf_inet_addr saved_addr;
 	/* This is the original per-proto part, used to map the

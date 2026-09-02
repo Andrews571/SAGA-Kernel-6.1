@@ -191,6 +191,14 @@ static bool damon_reclaim_enabled(void)
 }
 
 
+	now_enabled = enabled;
+	if (damon_reclaim_enabled() == now_enabled)
+		return;
+	damon_reclaim_turn(now_enabled);
+}
+static DECLARE_DELAYED_WORK(damon_reclaim_timer, damon_reclaim_timer_fn);
+
+static bool damon_reclaim_initialized;
 
 static int damon_reclaim_enabled_store(const char *val,
 		const struct kernel_param *kp)
