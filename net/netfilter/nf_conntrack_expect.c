@@ -320,6 +320,10 @@ void nf_ct_expect_init(struct nf_conntrack_expect *exp, unsigned int class,
 		       const union nf_inet_addr *daddr,
 		       u_int8_t proto, const __be16 *src, const __be16 *dst)
 {
+	struct nf_conntrack_helper *helper = NULL;
+	struct nf_conn *ct = exp->master;
+	struct net *net = read_pnet(&ct->ct_net);
+	struct nf_conn_help *help;
 	int len;
 
 	if (family == AF_INET)
