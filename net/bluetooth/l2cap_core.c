@@ -6817,16 +6817,6 @@ static void l2cap_chan_le_send_credits(struct l2cap_chan *chan)
 		ida_free(&conn->tx_ida, ident);
 }
 
-	/* L2CAP_LE_CREDITS has no response so the ident is never released by
-	 * l2cap_put_ident() - release it right away, otherwise the tx_ida
-	 * range is exhausted after 254 packets and from then on credits are
-	 * sent with the invalid ident 0, which some remote stacks ignore,
-	 * stalling the channel.
-	 */
-	if (ident > 0)
-		ida_free(&conn->tx_ida, ident);
-}
-
 static int l2cap_ecred_recv(struct l2cap_chan *chan, struct sk_buff *skb)
 {
 	int err;
