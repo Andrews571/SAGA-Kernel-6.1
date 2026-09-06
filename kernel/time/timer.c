@@ -1524,6 +1524,26 @@ int del_timer_sync(struct timer_list *timer)
 }
 EXPORT_SYMBOL(del_timer_sync);
 
+/**
+ * timer_shutdown_sync - Shutdown a timer and prevent rearming
+ * @timer: The timer to be shutdown
+ *
+ * This tree's timer.c predates upstream's __timer_delete_sync()
+ * refactor (the "prevent rearming" internal flag doesn't exist here),
+ * so this is a compatible shim rather than a full backport: it gives
+ * callers the synchronous-delete guarantee they actually rely on for
+ * teardown, without the extra "reject any future rearm" protection
+ * upstream's version adds. That gap is acceptable for teardown paths
+ * (nothing should be re-arming a timer whose owner is being freed
+ * anyway) — see kernel/sched/psi.c and net/bridge/br_if.c for the
+ * actual callers in this tree.
+ */
+int timer_shutdown_sync(struct timer_list *timer)
+{
+	return del_timer_sync(timer);
+}
+EXPORT_SYMBOL_GPL(timer_shutdown_sync);
+
 static void call_timer_fn(struct timer_list *timer,
 			  void (*fn)(struct timer_list *),
 			  unsigned long baseclk)

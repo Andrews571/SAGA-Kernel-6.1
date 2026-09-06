@@ -976,7 +976,7 @@ void f2fs_submit_all_merged_ipu_writes(struct f2fs_sb_info *sbi)
 		f2fs_up_write(&io->bio_list_lock);
 
 		list_for_each_entry_safe(be, tmp, &list, list) {
-			__submit_bio(sbi, be->bio, DATA);
+			f2fs_submit_write_bio(sbi, be->bio, DATA);
 			del_bio_entry(be);
 		}
 	}

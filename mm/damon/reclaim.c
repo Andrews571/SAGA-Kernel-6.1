@@ -191,6 +191,10 @@ static bool damon_reclaim_enabled(void)
 }
 
 
+static void damon_reclaim_timer_fn(struct work_struct *work)
+{
+	bool now_enabled;
+
 	now_enabled = enabled;
 	if (damon_reclaim_enabled() == now_enabled)
 		return;
