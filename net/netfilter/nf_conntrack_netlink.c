@@ -3391,13 +3391,16 @@ static bool expect_iter_name(struct nf_conntrack_expect *exp, void *data)
 	const struct nf_conn_help *m_help;
 	const char *name = data;
 
+	bool ret;
+
+	rcu_read_lock();
 	m_help = nfct_help(exp->master);
 
 	helper = rcu_dereference(m_help->helper);
-	if (!helper)
-		return false;
+	ret = helper && strcmp(helper->name, name) == 0;
+	rcu_read_unlock();
 
-	return strcmp(helper->name, name) == 0;
+	return ret;
 }
 
 static bool expect_iter_all(struct nf_conntrack_expect *exp, void *data)
