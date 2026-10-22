@@ -189,6 +189,15 @@ extern void add_timer(struct timer_list *timer);
 extern int try_to_del_timer_sync(struct timer_list *timer);
 extern int del_timer_sync(struct timer_list *timer);
 
+/*
+ * Compat: o stable 6.1.187+ chama timer_delete_sync(); o ACK ainda usa o nome antigo.
+ * Mesma semântica de del_timer_sync().
+ */
+static inline int timer_delete_sync(struct timer_list *timer)
+{
+	return del_timer_sync(timer);
+}
+
 extern void init_timers(void);
 struct hrtimer;
 extern enum hrtimer_restart it_real_fn(struct hrtimer *);
